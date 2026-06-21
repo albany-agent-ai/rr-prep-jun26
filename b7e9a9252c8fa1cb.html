@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sierra Customer Base Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#1C3829; --cream:#F4EFE6; --paper:#FBFAF6; --offblack:#0E1A12;
+  --sage:#5C7A63; --sky:#A8C5DB; --bone:#E6DFD0; --logo:#006838;
+  --g90:#1F2A23; --g60:#5E6B62; --g40:#9CA59F; --g20:#D5D2C9;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"Lora",Georgia,serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--cream);color:var(--offblack);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 32px 80px;}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sage);font-weight:500;margin:0 0 10px;}
+h1{font-size:34px;font-weight:500;letter-spacing:-.01em;margin:0 0 6px;color:var(--forest);}
+.sub{color:var(--g60);max-width:780px;margin:0 0 8px;}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;}
+.head-l{min-width:0;}
+.brand{margin:0 0 14px;}
+.brand svg{height:102px;width:auto;display:block;}
+.tabs{display:flex;gap:8px;margin:20px 0 8px;flex-wrap:wrap;}
+.tab{appearance:none;border:1px solid var(--g20);background:var(--paper);color:var(--g60);font-family:var(--font);font-size:13px;font-weight:500;padding:9px 18px;border-radius:6px;cursor:pointer;}
+.tab[aria-selected="true"]{background:var(--forest);color:var(--cream);border-color:var(--forest);}
+.view{display:none;} .view.active{display:block;}
+.mapdims{display:inline-flex;border:1px solid var(--g20);border-radius:6px;overflow:hidden;margin-bottom:12px;flex-wrap:wrap;}
+.mapdims button{appearance:none;border:0;border-right:1px solid var(--g20);background:var(--cream);color:var(--g60);font-family:var(--font);font-size:12.5px;padding:7px 14px;cursor:pointer;}
+.mapdims button:last-child{border-right:0;}
+.mapdims button[aria-pressed="true"]{background:var(--forest);color:var(--cream);}
+.maphint{margin:0 0 12px;font-size:12.5px;color:var(--g60);}
+.mapwrap{position:relative;background:var(--paper);border:1px solid var(--g20);border-radius:8px;padding:16px;overflow:hidden;}
+.bubblefield{position:relative;width:100%;min-height:120px;}
+.bub{position:absolute;width:18px;height:18px;border-radius:50%;cursor:pointer;border:1px solid rgba(251,250,246,.6);
+  transition:left .6s cubic-bezier(.4,0,.2,1),top .6s cubic-bezier(.4,0,.2,1),opacity .4s,transform .12s;}
+.bub:hover{transform:scale(1.4);z-index:5;}
+.bub.dim{opacity:.14 !important;}
+.clabel{position:absolute;transform:translateX(-50%);text-align:center;font-size:11px;font-weight:600;color:var(--forest);pointer-events:none;letter-spacing:.02em;width:150px;line-height:1.25;}
+.clabel span{display:block;font-size:10px;font-weight:400;color:var(--g60);}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;}
+.lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--g90);border:1px solid var(--g20);border-radius:14px;padding:4px 11px;cursor:pointer;background:var(--cream);}
+.lg:hover{border-color:var(--sage);}
+.lg[aria-pressed="true"]{background:var(--forest);color:var(--cream);border-color:var(--forest);}
+.tip{position:fixed;pointer-events:none;background:var(--forest);color:var(--cream);font-size:12px;padding:5px 9px;border-radius:6px;opacity:0;transition:opacity .12s;z-index:60;white-space:nowrap;}
+.summary{background:var(--forest);color:var(--cream);border-radius:8px;padding:22px 26px;margin-bottom:22px;}
+.summary .eyebrow{color:var(--sky);}
+.summary h3{margin:0 0 10px;font-size:17px;font-weight:500;}
+.summary p{margin:0 0 10px;color:#E8E4D8;} .summary p:last-child{margin:0;}
+.summary .read{font-family:var(--serif);font-style:italic;font-size:16px;color:#fff;border-left:2px solid var(--sky);padding-left:14px;margin-top:14px;}
+.summary a{color:var(--sky);}
+.metrics{display:flex;flex-wrap:wrap;gap:26px;margin:14px 0 4px;}
+.metric .n{font-size:24px;font-weight:600;color:#fff;line-height:1.1;}
+.metric .l{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--sky);margin-top:2px;}
+.group{margin-bottom:30px;}
+.group-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--g20);padding-bottom:8px;}
+.group-head h2{font-size:19px;font-weight:500;color:var(--forest);margin:0;}
+.group-head .gc{font-size:12px;color:var(--g60);}
+.gsummary{background:var(--bone);border-radius:0 0 8px 8px;padding:16px 20px;margin-bottom:6px;font-size:13.5px;color:var(--g90);}
+.gsummary .read{font-family:var(--serif);font-style:italic;color:var(--forest);margin-top:8px;display:block;}
+.reset{appearance:none;border:0;background:none;color:var(--sage);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;text-decoration:underline;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--g60);font-weight:600;padding:10px 10px;border-bottom:1px solid var(--g20);}
+tbody td{padding:9px 10px;border-bottom:1px solid var(--g20);vertical-align:top;}
+tbody tr:hover{background:var(--paper);}
+.name{font-weight:500;color:var(--forest);} .tname{white-space:nowrap;}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:10px;background:var(--bone);color:var(--g90);white-space:nowrap;}
+.tag.eu{background:#dCe7d8;color:var(--forest);font-weight:500;} .tag.b2b{background:#e3e0d6;color:var(--g60);}
+.src a{font-size:10.5px;color:var(--sage);letter-spacing:.04em;text-transform:uppercase;text-decoration:none;border-bottom:1px dotted var(--g40);}
+.src a:hover{color:var(--forest);}
+.whylink{color:var(--g90);text-decoration:none;border-bottom:1px dotted var(--g40);} .whylink:hover{color:var(--forest);}
+.coverage{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px;}
+.cov{flex:1 1 150px;background:var(--paper);border:1px solid var(--g20);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .12s;}
+.cov:hover{border-color:var(--sage);} .cov.active{outline:2px solid var(--forest);outline-offset:-1px;background:var(--bone);}
+.cov .v{font-size:12px;font-weight:600;color:var(--forest);} .cov .nums{font-size:12px;color:var(--g60);margin-top:4px;}
+.cov.white{border-color:var(--sage);background:#eef2ec;} .cov .ws{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--logo);font-weight:600;margin-top:4px;}
+.fitcell{min-width:104px;} .bar{height:7px;border-radius:4px;background:var(--g20);overflow:hidden;margin-top:3px;} .bar>span{display:block;height:100%;background:var(--logo);}
+.flagpill{display:inline-block;font-size:10px;letter-spacing:.03em;padding:1px 7px;border-radius:9px;}
+.flagpill.open{background:#dCe7d8;color:var(--forest);} .flagpill.occ{background:#efe3d3;color:#8a5a22;}
+a.flagpill.occ{text-decoration:none;cursor:pointer;} a.flagpill.occ:hover{background:#e6d3ba;}
+.icp-table thead th{background:var(--forest);color:var(--cream);}
+.w-high{color:var(--logo);font-weight:600;} .w-med{color:var(--sage);font-weight:600;}
+.scorer{background:var(--paper);border:1px solid var(--g20);border-radius:8px;padding:22px 24px;margin-top:24px;}
+.scorer h3{margin:0 0 4px;color:var(--forest);font-weight:500;font-size:18px;}
+.crit{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--g20);}
+.crit .ct{font-size:13.5px;} .crit .cw{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--g40);}
+.seg{display:flex;border:1px solid var(--g20);border-radius:6px;overflow:hidden;flex:0 0 auto;}
+.seg button{appearance:none;border:0;background:var(--cream);color:var(--g60);font-family:var(--font);font-size:12px;padding:6px 12px;cursor:pointer;border-right:1px solid var(--g20);}
+.seg button:last-child{border-right:0;} .seg button[aria-pressed="true"]{background:var(--sage);color:var(--paper);}
+.dq{margin-top:18px;} .dq label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--g90);padding:5px 0;cursor:pointer;}
+.verdict{margin-top:20px;padding:18px 20px;border-radius:8px;background:var(--forest);color:var(--cream);}
+.verdict .score{font-size:34px;font-weight:600;color:#fff;} .verdict .label{font-size:14px;color:var(--sky);} .verdict .vtext{margin-top:6px;color:#E8E4D8;font-size:13.5px;}
+.matchbox{margin-top:16px;background:var(--bone);border-radius:8px;padding:16px 18px;}
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;}
+.mchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--g90);background:var(--paper);border:1px solid var(--g20);border-radius:13px;padding:3px 10px;}
+.mdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+.matchbox .hint{font-size:11.5px;color:var(--g60);margin:10px 0 0;line-height:1.5;}
+.footnote{font-size:11.5px;color:var(--g40);margin-top:26px;line-height:1.6;}
+.footnote a{color:var(--sage);text-decoration:none;border-bottom:1px dotted var(--g40);}
+.footnote a:hover{color:var(--forest);}
+@media(max-width:680px){.wrap{padding:24px 16px 60px;}h1{font-size:26px;}.head{flex-direction:column;}.brand svg{height:78px;}.metrics{gap:16px;}
+  thead th:nth-child(4),tbody td:nth-child(4){display:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head-l">
+    <div class="brand" aria-label="Sierra">
+<svg width="266" height="84" viewBox="0 0 266 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M36.7507 0C51.2761 4.95307 52.0803 13.6751 50.8943 17.123C53.2865 14.3727 61.2422 10.7088 72.7956 20.8105C75.7675 35.8653 68.6161 40.9248 65.0378 41.6201C68.616 42.3154 75.7675 47.3729 72.7956 62.4277C61.2444 72.5294 53.2865 68.8656 50.8943 66.1152C52.0803 69.5632 51.276 78.2852 36.7507 83.2383C22.2255 78.2853 21.4211 69.5632 22.6071 66.1152C20.2148 68.8655 12.2591 72.5293 0.705781 62.4277C-2.26608 47.373 4.88532 42.3155 8.46359 41.6201C4.88531 40.9248 -2.26604 35.8651 0.705781 20.8105C12.2592 10.7089 20.2148 14.3727 22.6071 17.123C21.4211 13.6751 22.2254 4.95306 36.7507 0ZM36.7507 60.21C35.5797 64.09 31.5606 67.2616 23.1833 65.7041C24.9887 71.6306 30.5287 75.7471 36.7488 75.7471H36.7507C42.9686 75.7471 48.5085 71.6284 50.3161 65.7041C41.9388 67.2617 37.9195 64.09 36.7507 60.21ZM9.1052 41.9131C4.87736 46.4405 4.08218 53.2971 7.19113 58.6826C10.3023 64.0681 16.6372 66.8082 22.6726 65.4092C17.1348 58.9332 17.8708 53.8665 20.6472 50.9141C16.7019 51.8415 11.9466 49.9466 9.10715 41.9131H9.1052ZM64.3904 41.9131C61.5508 49.9469 56.7947 51.8417 52.8493 50.9141C55.6259 53.8665 56.3628 58.933 50.8249 65.4092C56.8603 66.8081 63.1975 64.0681 66.3064 58.6826H66.3044C69.4154 53.2971 68.6181 46.4405 64.3904 41.9131ZM52.1843 50.877C47.3224 54.9503 44.3247 53.1102 42.8376 51.9102L42.5622 51.6826C42.8794 53.451 43.4072 57.2972 37.0525 59.6152C39.9789 62.2938 44.3676 62.7883 47.822 60.7939C51.2764 58.7996 53.0403 54.7505 52.1843 50.877ZM21.32 50.876C20.4636 54.7484 22.2301 58.7962 25.6833 60.79C29.1377 62.7843 33.5264 62.2889 36.4529 59.6104C30.0962 57.2923 30.6259 53.4471 30.9431 51.6787C29.57 52.8388 26.505 55.2194 21.32 50.876ZM221.222 26.5742C226.864 26.5742 231.007 30.402 231.008 35.5527C231.008 39.7391 228.314 43.1656 224.316 44.2627L228.07 50.0566H228.073C230.617 53.9818 231.788 55.1638 233.686 56.415L233.643 56.7891C228.258 58.175 226.057 55.6487 225.096 54.167L218.952 44.6885H213.628V52.2988C213.628 54.5578 214.216 55.5789 215.713 56.4131L215.67 56.7871H206.646L206.603 56.4131C208.185 55.5789 208.776 54.5579 208.776 52.2988V31.0625C208.776 28.8032 208.185 27.7825 206.603 26.9482L206.646 26.5742H221.222ZM111.562 26.1191C114.973 26.1191 117.015 27.2986 118.44 27.2988C118.857 27.2988 119.231 27.1833 119.577 26.9248L119.864 26.9688L121.131 34.4941L120.741 34.6523C117.949 31.6025 114.784 30.3233 111.619 30.3232C108.453 30.3232 106.324 31.8049 106.324 34.3076C106.324 36.9555 108.712 37.6871 111.647 38.4648L114.582 39.2559V39.2539C119.216 40.477 122.871 42.6345 122.871 48.1309C122.871 53.6271 118.912 57.1807 112.251 57.1807C109.196 57.1806 106.804 56.586 104.712 55.9277C102.72 55.3302 102.275 53.4419 101.816 51.7236L100.927 47.959L101.316 47.8008C104.684 51.4114 108.712 52.8213 112.151 52.8213C115.59 52.8213 117.791 51.1243 117.791 48.6064C117.791 45.8018 115.058 44.709 112.194 44.0029L109.216 43.2402C104.569 42.1322 101.403 39.5424 101.403 34.8369C101.403 29.4581 105.477 26.1191 111.562 26.1191ZM189.485 26.5742C195.127 26.5742 199.27 30.402 199.27 35.5527C199.27 39.7391 196.576 43.1656 192.579 44.2627L196.333 50.0566H196.336C198.137 52.8351 199.762 55.0032 202.725 56.4131L202.681 56.7891C200.813 57.3256 195.779 57.899 193.359 54.167L187.215 44.6885H181.89V52.2988C181.89 54.5578 182.479 55.5789 183.975 56.4131L183.932 56.7871H174.909L174.866 56.4131C176.447 55.5789 177.039 54.5579 177.039 52.2988V31.0625C177.039 28.8032 176.447 27.7825 174.866 26.9482L174.909 26.5742H189.485ZM263.049 52.5156H263.051C263.872 54.6163 264.647 55.5808 266.001 56.415L265.986 56.7891H256.965L256.922 56.415C258.46 55.6243 258.777 54.7159 258.014 52.6738L256.748 49.3652H244.316L243.093 52.6738C242.331 54.7158 242.648 55.6243 244.201 56.415L244.158 56.7891H235.281L235.265 56.415C236.617 55.5808 237.395 54.6163 238.229 52.5156L246.517 31.2363C247.293 29.1942 246.819 27.8693 244.976 27.0068L245.02 26.5742H253.092L263.049 52.5156ZM138.79 26.9482C137.134 27.7825 136.502 28.8032 136.502 31.0625V52.2988C136.502 54.5579 137.134 55.5789 138.79 56.4131L138.746 56.7871H129.408L129.365 56.4131C131.049 55.5789 131.653 54.5579 131.653 52.2988V31.0625C131.653 28.8032 131.049 27.7825 129.365 26.9482L129.408 26.5742H138.746L138.79 26.9482ZM167.972 33.1201L167.598 33.2783C165.899 31.5231 163.842 30.7754 160.994 30.7754H152.605V38.7461H159.853C161.824 38.7461 162.945 38.1556 163.766 36.9043L164.139 36.9482V44.7031L163.766 44.7471C162.947 43.4957 161.824 42.876 159.853 42.876H152.605V52.5869H161.959V52.585C164.707 52.5849 166.764 51.7358 168.606 49.8525L168.936 50.0107L167.268 56.7871H145.627L145.584 56.4131C147.165 55.5789 147.756 54.5579 147.757 52.2988V31.0625C147.757 28.8032 147.167 27.7825 145.584 26.9482L145.627 26.5742H166.26L167.972 33.1201ZM36.7527 27.9072C34.2434 27.9074 31.9359 29.6026 31.282 32.1465C28.7532 31.4428 26.1312 32.5914 24.8777 34.7637C23.6241 36.9361 23.9392 39.7822 25.8142 41.6201C23.9392 43.4602 23.6241 46.3041 24.8777 48.4766C26.1312 50.6489 28.7511 51.7983 31.282 51.0947C31.9381 53.6385 34.2435 55.3329 36.7527 55.333C39.2619 55.333 41.5693 53.6385 42.2234 51.0947C44.7522 51.7986 47.3751 50.649 48.6286 48.4766C49.8821 46.3041 49.5669 43.458 47.6921 41.6201C49.5669 39.78 49.8822 36.9361 48.6286 34.7637C47.3751 32.5912 44.7544 31.4426 42.2234 32.1465C41.5672 29.6025 39.262 27.9072 36.7527 27.9072ZM21.0193 32.8828C17.2368 34.0777 14.6121 37.6315 14.612 41.6201C14.612 45.6109 17.2368 49.1626 21.0193 50.3574C19.8486 43.6953 23.4431 42.2285 25.1335 41.6201C23.4431 41.0096 19.8507 39.545 21.0193 32.8828ZM52.4802 32.8828C53.6511 39.5455 50.0552 41.0118 48.365 41.6201C50.0552 42.2306 53.651 43.6948 52.4802 50.3574C56.2626 49.1625 58.8874 45.6087 58.8874 41.6201C58.8874 37.6293 56.2626 34.0777 52.4802 32.8828ZM42.2195 38.4609V44.7764L36.7488 47.9355L31.278 44.7764V38.4609L36.7488 35.3027L42.2195 38.4609ZM245.911 45.1055H255.149L250.53 32.79L245.911 45.1055ZM22.6745 17.8291C16.6392 16.4301 10.302 19.1702 7.19309 24.5557C4.08201 29.9412 4.87933 36.7978 9.10715 41.3252L9.1091 41.3271C11.9487 33.2912 16.7047 31.3966 20.6501 32.3242C17.8736 29.3718 17.1366 24.3052 22.6745 17.8291ZM66.3083 24.5537C63.1972 19.1682 56.8623 16.4281 50.8269 17.8271C56.3648 24.3033 55.6278 29.3699 52.8513 32.3223C56.7967 31.3946 61.5527 33.2914 64.3923 41.3252C68.6201 36.7978 69.4152 29.9412 66.3064 24.5557L66.3083 24.5537ZM181.887 30.791V40.4453H189.24C192.103 40.4452 194.26 38.3012 194.26 35.5967C194.26 32.892 192.103 30.7911 189.24 30.791H181.887ZM213.625 40.4453H220.977C223.841 40.4452 225.998 38.3012 225.998 35.5967C225.998 32.892 223.841 30.7911 220.977 30.791H213.625V40.4453ZM47.82 22.4502C44.3657 20.4559 39.977 20.9512 37.0505 23.6299L37.0486 23.6318C43.405 25.9497 42.8755 29.7949 42.5583 31.5635C43.9315 30.4033 46.997 28.023 52.1823 32.3672C53.0403 28.4938 51.2743 24.4445 47.82 22.4502ZM36.4509 23.6279C33.5244 20.9493 29.1358 20.4539 25.6814 22.4482C22.2271 24.4426 20.4632 28.4918 21.3191 32.3652C26.5045 28.0208 29.5699 30.4035 30.9431 31.5615L30.9411 31.5596C30.6239 29.7912 30.0962 25.946 36.4509 23.6279ZM36.7507 7.49316C30.5328 7.49319 24.9929 11.6119 23.1853 17.5361C31.5626 15.9785 35.5838 19.1503 36.7527 23.0303C37.9215 19.1503 41.9409 15.9806 50.3181 17.5381C48.5126 11.614 42.9726 7.49512 36.7527 7.49512L36.7507 7.49316Z" fill="#006838"/>
+</svg>
+    </div>
+    <p class="eyebrow">Sierra · Enterprise AE Europe · territory intelligence</p>
+    <h1>Customer Base Explorer</h1>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" id="tab-base" onclick="showView('base')">Customer base</button>
+    <button class="tab" role="tab" aria-selected="false" id="tab-targets" onclick="showView('targets')">New logos</button>
+    <button class="tab" role="tab" aria-selected="false" id="tab-icp" onclick="showView('icp')">ICP scorecard</button>
+  </div>
+
+  <section class="view active" id="view-base">
+    <div class="mapdims" id="mapdims"></div>
+    <p class="maphint">Each bubble is one customer. Pick a lens and the bubbles cluster into groups; cluster size shows how many. Click a cluster or legend chip to drill into that group.</p>
+    <div class="mapwrap"><div class="bubblefield" id="bubblefield"></div></div>
+    <div class="legend" id="maplegend"></div>
+    <div id="results" style="margin-top:22px;"></div>
+    <p class="footnote" id="footBase"></p>
+  </section>
+
+  <section class="view" id="view-targets">
+    <div class="mapdims" id="tmapdims"></div>
+    <p class="maphint">Each target is one company. Cluster by vertical, recipient (Bret vs Clay) or seat status; cluster size shows how many. Click a cluster or legend chip to drill into that group.</p>
+    <div class="mapwrap"><div class="bubblefield" id="tbubblefield"></div></div>
+    <div class="legend" id="tlegend"></div>
+    <div id="tresults" style="margin-top:22px;"></div>
+    <p class="footnote" id="footTargets"></p>
+  </section>
+
+  <section class="view" id="view-icp">
+    <table class="icp-table" id="icp-table"></table>
+    <div class="scorer">
+      <h3>Score a prospect against the ICP</h3>
+      <p class="sub" style="margin-bottom:10px;">Rate how well a candidate meets each trait. Weighted fit updates live.</p>
+      <div id="crits"></div>
+      <div class="dq">
+        <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--g60);font-weight:600;">Disqualifiers (any one forces a pass)</span>
+        <label><input type="checkbox" class="dqbox" onchange="scoreNow()"> Already a named Sierra logo</label>
+        <label><input type="checkbox" class="dqbox" onchange="scoreNow()"> Under $100M revenue</label>
+        <label><input type="checkbox" class="dqbox" onchange="scoreNow()"> Pure low-volume B2B (few consumer interactions)</label>
+        <label><input type="checkbox" class="dqbox" onchange="scoreNow()"> US-only, no European footprint</label>
+        <label><input type="checkbox" class="dqbox" onchange="scoreNow()"> No reachable, founder-worthy exec</label>
+      </div>
+      <div class="verdict" id="verdict"></div>
+      <div class="matchbox" id="icpMatches"></div>
+    </div>
+    <p class="footnote" id="footIcp"></p>
+  </section>
+
+</div>
+
+<script>
+const VERTS=["Financial services","Healthcare","Telecommunications","Media",
+  "Travel, transportation & hospitality","Retail & consumer goods","Technology"];
+const CS="https://sierra.ai/customers/";
+const BLOG="https://sierra.ai/blog/theres-an-agent-for-that-and-it-runs-on-sierra";
+const PRESS="https://research.contrary.com/company/sierra";
+const CUST="https://sierra.ai/customers";
+
+const DATA=[
+ {n:"NEXT",sector:"Retail & consumer goods",region:"UK",rev:"$1B–$10B",revL:"~$8.0B",model:"Consumer",useCase:"Returns & order support",src:"Case study",url:CS+"next"},
+ {n:"Deliveroo",sector:"Retail & consumer goods",region:"UK",rev:"$1B–$10B",revL:"~$2.7B",model:"Consumer",useCase:"Returns & order support",src:"Blog",url:BLOG},
+ {n:"ASOS",sector:"Retail & consumer goods",region:"UK",rev:"$1B–$10B",revL:"~$3.1B",model:"Consumer",useCase:"Returns & order support",src:"Press",url:"https://retailtechinnovationhub.com/home/2025/12/28/asos-reimagines-customer-experience-with-ai-as-online-fashion-retailer-inks-sierra-deal"},
+ {n:"Wayfair",sector:"Retail & consumer goods",region:"US",rev:"≥$10B",revL:"~$12B",model:"Consumer",useCase:"Returns & order support",src:"Testimonial",url:CUST},
+ {n:"Nordstrom",sector:"Retail & consumer goods",region:"US",rev:"≥$10B",revL:"~$15B",model:"Consumer",useCase:"Returns & order support",src:"Press",url:PRESS},
+ {n:"Vans (VF Corp)",sector:"Retail & consumer goods",region:"US",rev:"$1B–$10B",revL:"~$3B",model:"Consumer",useCase:"Product support & guidance",src:"Blog",url:BLOG},
+ {n:"Bissell",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Product support & guidance",src:"Blog",url:BLOG},
+ {n:"ScottsMiracle-Gro",sector:"Retail & consumer goods",region:"US",rev:"$1B–$10B",revL:"~$3.6B",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"scottsmiraclegro"},
+ {n:"Sonos",sector:"Retail & consumer goods",region:"US",rev:"$1B–$10B",revL:"~$1.5B",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"sonos"},
+ {n:"Casper",sector:"Retail & consumer goods",region:"US",rev:"$100M–$1B",revL:"~$0.5B",model:"Consumer",useCase:"Conversion & sales",src:"Case study",url:CS+"casper"},
+ {n:"Wilson",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"wilson"},
+ {n:"BARK",sector:"Retail & consumer goods",region:"US",rev:"$100M–$1B",revL:"~$0.5B",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"bark"},
+ {n:"Thrive Market",sector:"Retail & consumer goods",region:"US",rev:"$100M–$1B",revL:"~$0.5B",model:"Consumer",useCase:"Membership & engagement",src:"Case study",url:CS+"thrive-market"},
+ {n:"Minted",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"minted"},
+ {n:"Madison Reed",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"madison-reed"},
+ {n:"OluKai",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"olukai"},
+ {n:"Chubbies",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"chubbies"},
+ {n:"ThirdLove",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Conversion & sales",src:"Case study",url:CS+"thirdlove"},
+ {n:"melin",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Product support & guidance",src:"Case study",url:CS+"melin"},
+ {n:"Sun & Ski Sports",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Conversion & sales",src:"Case study",url:CS+"sun-and-ski-sports"},
+ {n:"ecoATM",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Returns & order support",src:"Case study",url:CS+"ecoatm"},
+ {n:"Rivian",sector:"Retail & consumer goods",region:"US",rev:"$1B–$10B",revL:"~$5B",model:"Consumer",useCase:"Product support & guidance",src:"Press",url:PRESS},
+ {n:"Safelite (Belron)",sector:"Retail & consumer goods",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Returns & order support",src:"Case study",url:CS+"safelite"},
+ {n:"Marshmallow",sector:"Financial services",region:"UK",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Claims & policy",src:"Case study",url:CS+"marshmallow"},
+ {n:"Nubank",sector:"Financial services",region:"LatAm",rev:"≥$10B",revL:"~$11B",model:"Consumer",useCase:"Banking support",src:"Press",url:PRESS},
+ {n:"SoFi",sector:"Financial services",region:"US",rev:"$1B–$10B",revL:"~$2.7B",model:"Consumer",useCase:"Account & payments",src:"Case study",url:CS+"sofi"},
+ {n:"Rocket Mortgage",sector:"Financial services",region:"US",rev:"$1B–$10B",revL:"~$5B",model:"Consumer",useCase:"Conversion & sales",src:"Case study",url:CS+"rocket-mortgage"},
+ {n:"Chime",sector:"Financial services",region:"US",rev:"$1B–$10B",revL:"~$1.7B",model:"Consumer",useCase:"Banking support",src:"Case study",url:CS+"chime"},
+ {n:"Brex",sector:"Financial services",region:"US",rev:"Undisclosed",revL:"private",model:"B2B",useCase:"Account & payments",src:"Case study",url:CS+"brex"},
+ {n:"Ramp",sector:"Financial services",region:"US",rev:"$100M–$1B",revL:"~$700M ARR",model:"B2B",useCase:"Account & payments",src:"Case study",url:CS+"ramp"},
+ {n:"Imprint",sector:"Financial services",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Account & payments",src:"Case study",url:CS+"imprint"},
+ {n:"Funnel Leasing",sector:"Financial services",region:"US",rev:"Undisclosed",revL:"private",model:"B2B",useCase:"Account & payments",src:"Case study",url:CS+"funnel-leasing"},
+ {n:"Sutter Health",sector:"Healthcare",region:"US",rev:"≥$10B",revL:"~$16B",model:"Consumer",useCase:"Care navigation & scheduling",src:"Case study",url:CS+"sutter-health"},
+ {n:"R1 RCM",sector:"Healthcare",region:"US",rev:"$1B–$10B",revL:"~$2.6B",model:"B2B",useCase:"Care navigation & scheduling",src:"Case study",url:CS+"r1-rcm"},
+ {n:"WeightWatchers",sector:"Healthcare",region:"US",rev:"$100M–$1B",revL:"~$0.8B",model:"Consumer",useCase:"Care navigation & scheduling",src:"Case study",url:CS+"weightwatchers"},
+ {n:"AG1",sector:"Healthcare",region:"US",rev:"$100M–$1B",revL:"~$0.6B",model:"Consumer",useCase:"Care navigation & scheduling",src:"Case study",url:CS+"ag1"},
+ {n:"Pendulum",sector:"Healthcare",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Care navigation & scheduling",src:"Case study",url:CS+"pendulum"},
+ {n:"Modern Animal",sector:"Healthcare",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Care navigation & scheduling",src:"Case study",url:CS+"modern-animal"},
+ {n:"Cigna",sector:"Healthcare",region:"US",rev:"≥$10B",revL:"~$235B",model:"Consumer",useCase:"Care navigation & scheduling",src:"Press",url:PRESS},
+ {n:"Singtel",sector:"Telecommunications",region:"Asia",rev:"≥$10B",revL:"~$10.4B",model:"Consumer",useCase:"Account & payments",src:"Case study",url:CS+"singtel"},
+ {n:"SiriusXM",sector:"Media",region:"US",rev:"$1B–$10B",revL:"~$8.7B",model:"Consumer",useCase:"Retention & loyalty",src:"Case study",url:CS+"siriusxm"},
+ {n:"Tubi (Fox)",sector:"Media",region:"US",rev:"Undisclosed",revL:"part of Fox",model:"Consumer",useCase:"Retention & loyalty",src:"Case study",url:CS+"tubi"},
+ {n:"AOL",sector:"Media",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Retention & loyalty",src:"Case study",url:CS+"aol"},
+ {n:"Vivid Seats",sector:"Media",region:"US",rev:"$100M–$1B",revL:"~$0.78B",model:"Consumer",useCase:"Membership & engagement",src:"Case study",url:CS+"vivid-seats"},
+ {n:"CLEAR",sector:"Travel, transportation & hospitality",region:"US",rev:"$100M–$1B",revL:"~$0.77B",model:"Consumer",useCase:"Membership & engagement",src:"Case study",url:CS+"clear"},
+ {n:"Woodside Collection",sector:"Travel, transportation & hospitality",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Membership & engagement",src:"Case study",url:CS+"woodside-collection"},
+ {n:"RunBuggy",sector:"Travel, transportation & hospitality",region:"US",rev:"Undisclosed",revL:"private",model:"B2B",useCase:"Returns & order support",src:"Case study",url:CS+"runbuggy"},
+ {n:"Kraken (Octopus Energy)",sector:"Technology",region:"UK",rev:"≥$10B",revL:"~$19B+ grp",model:"Consumer",useCase:"Account & payments",src:"Case study",url:CS+"kraken"},
+ {n:"ADT",sector:"Technology",region:"US",rev:"$1B–$10B",revL:"~$5B",model:"Consumer",useCase:"Account & payments",src:"Case study",url:CS+"adt"},
+ {n:"GoFundMe",sector:"Technology",region:"US",rev:"Undisclosed",revL:"private",model:"Consumer",useCase:"Membership & engagement",src:"Case study",url:CS+"gofundme"},
+ {n:"Discord",sector:"Technology",region:"US",rev:"Undisclosed",revL:"~$600M",model:"Consumer",useCase:"Membership & engagement",src:"Blog",url:BLOG},
+ {n:"Redfin",sector:"Technology",region:"US",rev:"$1B–$10B",revL:"~$1B",model:"Consumer",useCase:"Conversion & sales",src:"Case study",url:CS+"redfin"},
+ {n:"Guild",sector:"Technology",region:"US",rev:"Undisclosed",revL:"private",model:"B2B",useCase:"Membership & engagement",src:"Case study",url:CS+"guild"},
+ {n:"Airtable",sector:"Technology",region:"US",rev:"$100M–$1B",revL:"~$375M ARR",model:"B2B",useCase:"Product support & guidance",src:"Case study",url:CS+"airtable"},
+ {n:"CDW",sector:"Technology",region:"US",rev:"≥$10B",revL:"~$21B",model:"B2B",useCase:"Product support & guidance",src:"Case study",url:CS+"cdw"},
+ {n:"Paychex",sector:"Technology",region:"US",rev:"$1B–$10B",revL:"~$5.5B",model:"B2B",useCase:"Account & payments",src:"Case study",url:CS+"paychex"}
+];
+
+const TARGETS=[
+ {rank:1,n:"Vinted",sector:"Retail & consumer goods",hq:"Lithuania",scale:"~$1.2B rev / ~$11.7B GMV",mirrors:"Deliveroo, Wayfair",wedge:"Disputes, order & payment, trust & safety",why:"FY2025 results (Apr 2026): revenue +38%, profit deliberately cut to fund member safety, support and German expansion",whyUrl:"https://company.vinted.com/newsroom/financial-results-2025",rec:"Bret (founder-led)",recS:"Bret",seat:"Open seat",fit:90,open:true},
+ {rank:2,n:"Inditex (Zara)",sector:"Retail & consumer goods",hq:"Spain",scale:"~$42B rev, 200+ markets",mirrors:"NEXT, H&M",wedge:"Returns + identity, multilingual brand voice",why:"FY2025 results (Mar 2026): record online sales; scaling AI in operations while the customer-facing seat stays open",whyUrl:"https://en.wikipedia.org/wiki/Inditex",rec:"Bret (CEO peer)",recS:"Bret",seat:"Open seat",fit:89,open:true},
+ {rank:3,n:"Zalando",sector:"Retail & consumer goods",hq:"Germany",scale:"~$13.3B rev, 62M customers, 17 markets",mirrors:"NEXT, Wayfair",wedge:"Returns + identity, multi-brand voice",why:"FY2025 results (Mar 2026) name AI the 2026 growth lever; absorbing the ABOUT YOU acquisition",whyUrl:"https://corporate.zalando.com/en/investor-relations/zalando-full-year-2025-results",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:88,open:false,incumbentUrl:"https://corporate.zalando.com/en/investor-relations/zalando-full-year-2025-results"},
+ {rank:4,n:"Delivery Hero",sector:"Retail & consumer goods",hq:"Germany",scale:"~$13B rev, 70+ countries",mirrors:"Deliveroo, Bolt",wedge:"Order & delivery issues, refunds, courier support",why:"Herogen autonomous-agent launch (2026) and profitability push; CX still on Twilio and point tools",whyUrl:"https://www.deliveryhero.com/newsroom/delivery-hero-unveils-herogen-autonomous-ai-agent-unlocks-130-person-engineering-output/",rec:"Bret (founder-led)",recS:"Bret",seat:"Incumbent AI",fit:87,open:false,incumbentUrl:"https://retailtechinnovationhub.com/home/2026/1/27/delivery-hero-reduces-last-mile-delivery-friction-using-twilio-automated-voice-technology"},
+ {rank:5,n:"IKEA (Ingka)",sector:"Retail & consumer goods",hq:"Netherlands",scale:"~$45B rev, 30+ markets",mirrors:"Wayfair, NEXT",wedge:"Returns, delivery, product & design support",why:"2026: scaling its 'Billie' assistant and reskilling 8,500 agents; multilingual home-retail volume rising",whyUrl:"https://www.pymnts.com/news/artificial-intelligence/2026/ikea-turned-8500-call-agents-into-design-consultants/",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:87,open:false,incumbentUrl:"https://www.pymnts.com/news/artificial-intelligence/2026/ikea-turned-8500-call-agents-into-design-consultants/"},
+ {rank:6,n:"Bolt",sector:"Travel, transportation & hospitality",hq:"Estonia",scale:"~$4.5B ARR, 87% Europe",mirrors:"Deliveroo",wedge:"Ride/delivery issues, refunds, driver-rider support",why:"Reaffirmed 2026 IPO plan (late 2025); scaling ride-hailing and delivery across 45+ countries, CX cost in focus",whyUrl:"https://finimize.com/content/bolt-drives-forward-with-2-billion-revenue-milestone",rec:"Bret (founder-led)",recS:"Bret",seat:"Open seat",fit:86,open:true},
+ {rank:7,n:"adidas",sector:"Retail & consumer goods",hq:"Germany",scale:"~$26B rev, global DTC",mirrors:"Vans, NEXT",wedge:"Returns, order support, brand-voice service",why:"June 2026: launched ecommerce-as-a-service with Salesforce AI agents; DTC turnaround under Gulden",whyUrl:"https://www.digitalcommerce360.com/2026/06/10/adidas-ecommerce-as-a-service-eaas-salesforce-ai-agents/",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:86,open:false,incumbentUrl:"https://www.digitalcommerce360.com/2026/06/10/adidas-ecommerce-as-a-service-eaas-salesforce-ai-agents/"},
+ {rank:8,n:"Orange",sector:"Telecommunications",hq:"France",scale:"~$44B rev, 26 countries",mirrors:"Singtel, Kraken",wedge:"Billing, account, connectivity troubleshooting",why:"2026 'AI-Native Telco' strategy; expanding AI assistants in customer service across markets",whyUrl:"https://www.telecomtv.com/content/ai/how-orange-is-putting-ai-at-the-heart-of-its-new-strategy-55105/",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:86,open:false,incumbentUrl:"https://www.telecomtv.com/content/ai/how-orange-is-putting-ai-at-the-heart-of-its-new-strategy-55105/"},
+ {rank:9,n:"Just Eat Takeaway",sector:"Retail & consumer goods",hq:"Netherlands",scale:"~$5.5B rev, 17 markets",mirrors:"Deliveroo, Bolt",wedge:"Order & delivery support, automated refunds",why:"Jan 2026 AI voice-assistant launch; being taken private by Prosus (~$4.4B), a full CX reset underway",whyUrl:"https://newsroom.justeattakeaway.com/en-WW/259937-introducing-the-next-evolution-of-ordering-just-eat-takeaway-com-unveils-ai-voice-assistant/",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:86,open:false,incumbentUrl:"https://newsroom.justeattakeaway.com/en-WW/259937-introducing-the-next-evolution-of-ordering-just-eat-takeaway-com-unveils-ai-voice-assistant/"},
+ {rank:10,n:"H&M",sector:"Retail & consumer goods",hq:"Sweden",scale:"~$22B rev, ~75 markets",mirrors:"NEXT, Zalando",wedge:"Returns + identity, multilingual support",why:"Q4 FY2025 results (Jan 2026): online growth straining multilingual service; group-wide AI rollout underway",whyUrl:"https://www.code.id/post/case-study-h-m-s-ai-powered-customer-engagement-transformation",rec:"Clay (platform)",recS:"Clay",seat:"Open seat",fit:85,open:true},
+ {rank:11,n:"AXA",sector:"Financial services",hq:"France",scale:"~$110B rev, 50+ countries",mirrors:"Marshmallow, Aviva",wedge:"Claims, FNOL, multilingual policy support",why:"2025-26: AI fraud-detection and multilingual claims tooling rolling out across markets",whyUrl:"https://nextlevel.ai/ai-insurance-customer-service-transformation/",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:85,open:false,incumbentUrl:"https://nextlevel.ai/ai-insurance-customer-service-transformation/"},
+ {rank:12,n:"Spotify",sector:"Media",hq:"Sweden",scale:"~$18B rev, 180+ markets",mirrors:"SiriusXM, Tubi",wedge:"Billing, subscription, cancellation support",why:"Q1 2026 results: record subscribers; support complaints rising while AI stays product-side, leaving CX open",whyUrl:"https://www.sec.gov/Archives/edgar/data/0001639920/000162828026027951/spot-20260331x6xk.htm",rec:"Bret (founder-led)",recS:"Bret",seat:"Open seat",fit:85,open:true},
+ {rank:13,n:"Decathlon",sector:"Retail & consumer goods",hq:"France",scale:"~$17B rev, 70+ countries",mirrors:"NEXT, Currys",wedge:"Returns, delivery status, product support",why:"2026: rolling out conversational AI service bots across phone, chat and messenger for returns and delivery",whyUrl:"https://www.parloa.com/customers/decathlon/",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:84,open:false,incumbentUrl:"https://www.parloa.com/customers/decathlon/"},
+ {rank:14,n:"VodafoneThree",sector:"Telecommunications",hq:"UK",scale:"28.8M customers",mirrors:"Singtel, Kraken",wedge:"Billing, account, retention across 5 brands",why:"H1 FY26 results (Nov 2025): integration underway with ~$890M synergy target, merging two CX orgs across 5 brands",whyUrl:"https://www.vodafone.com/news/newsroom/corporate-and-financial/completion-of-vodafone-and-three-merger-in-the-uk",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:82,open:false,incumbentUrl:"https://www.juniperresearch.com/resources/blog/what-the-arrival-of-vodafonethree-means-for-uk-telecoms/"},
+ {rank:15,n:"Aviva / Direct Line",sector:"Financial services",hq:"UK",scale:"20M UK policies",mirrors:"Marshmallow",wedge:"Claims, FNOL, policy support",why:"FY2025 results (Mar 2026): integrating Direct Line's 8M policies; AI claims triage rolling out across 20M customers",whyUrl:"https://www.aviva.com/newsroom/news-releases/2026/03/full-year-2025-results-announcement/",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:80,open:false,incumbentUrl:"https://www.aviva.com/newsroom/news-releases/2026/03/full-year-2025-results-announcement/"},
+ {rank:16,n:"Wise",sector:"Financial services",hq:"UK",scale:"~$1.5B+ rev, 40 currencies",mirrors:"Chime, Nubank",wedge:"Multi-currency account & payments",why:"H1 FY26 results (Nov 2025): record customers and volume; US primary-listing move progressing, multilingual load rising",whyUrl:"https://en.wikipedia.org/wiki/Wise_(company)",rec:"Bret (founder-led)",recS:"Bret",seat:"Open seat",fit:80,open:true},
+ {rank:17,n:"Currys",sector:"Retail & consumer goods",hq:"UK",scale:"~$11B rev",mirrors:"Sonos, Vans",wedge:"Product support, warranty, post-sales",why:"H1 FY25/26 results (Dec 2025): services and iD Mobile growth; CIO sets out AI plan for post-sales and warranty",whyUrl:"https://www.computerweekly.com/news/366608463/Interview-Currys-CIO-Andy-Gamble-on-AI-strategy",rec:"Clay (platform)",recS:"Clay",seat:"Open seat",fit:78,open:true},
+ {rank:18,n:"Trainline",sector:"Travel, transportation & hospitality",hq:"UK",scale:"~$575M rev, ~$8.0B sales",mirrors:"NEXT (app-first)",wedge:"Disruption handling, refunds, multilingual booking",why:"FY2026 results (May 2026): >40% Spain/Italy growth; expanding AI disruption tools as EU liberalises France/Germany",whyUrl:"https://www.tipranks.com/news/company-announcements/trainline-lifts-profits-on-record-ticket-sales-and-ai-driven-rail-push",rec:"Clay (platform)",recS:"Clay",seat:"Incumbent AI",fit:76,open:false,incumbentUrl:"https://www.directorstalkinterviews.com/trainline-delivers-higher-profits-and-expands-ai-strategy-in-fy2026/4121250651"},
+ {rank:19,n:"Ryanair",sector:"Travel, transportation & hospitality",hq:"Ireland",scale:"~200M passengers",mirrors:"Singtel (volume)",wedge:"Disruption, refunds, booking changes",why:"FY2026 results (May 2026): record ~200M passengers; pushing myRyanair digital and AI bot amid persistent CX complaints",whyUrl:"https://aws.amazon.com/solutions/case-studies/innovators/ryanair/",rec:"Bret (CEO peer)",recS:"Bret",seat:"Incumbent AI",fit:74,open:false,incumbentUrl:"https://aws.amazon.com/solutions/case-studies/innovators/ryanair/"},
+ {rank:20,n:"Revolut",sector:"Financial services",hq:"UK",scale:"50M+ customers",mirrors:"Nubank, Chime",wedge:"Fraud, account, payments support",why:"ElevenLabs voice-agent rollout (2026) amid record ombudsman complaints; support quality under acute pressure",whyUrl:"https://elevenlabs.io/blog/revolut",rec:"Bret (founder-led)",recS:"Bret",seat:"Incumbent AI",fit:72,open:false,incumbentUrl:"https://elevenlabs.io/blog/revolut"}
+];
+const TREV={"Vinted":"$1B–$10B","Inditex (Zara)":"≥$10B","Zalando":"≥$10B","Delivery Hero":"≥$10B","IKEA (Ingka)":"≥$10B","Bolt":"$1B–$10B","adidas":"≥$10B","Orange":"≥$10B","Just Eat Takeaway":"$1B–$10B","H&M":"≥$10B","AXA":"≥$10B","Spotify":"≥$10B","Decathlon":"≥$10B","VodafoneThree":"≥$10B","Aviva / Direct Line":"≥$10B","Wise":"$1B–$10B","Currys":"≥$10B","Trainline":"$100M–$1B","Ryanair":"≥$10B","Revolut":"$1B–$10B"};
+const SRC_COMPANY=new Set(["Vinted","Zalando","Delivery Hero","Just Eat Takeaway","Spotify","VodafoneThree","Aviva / Direct Line"]);
+TARGETS.forEach(t=>{t.region=(t.hq==="UK"||t.hq==="Ireland")?"UK & Ireland":"Continental Europe";t.model="Consumer";t.rev=TREV[t.n]||"Undisclosed";t.src=SRC_COMPANY.has(t.n)?"Company report":"Press / industry";});
+
+const REVORDER=["≥$10B","$1B–$10B","$100M–$1B","Undisclosed"];
+const REGORDER=["US","UK","Asia","LatAm"];
+const MODELORDER=["Consumer","B2B"];
+const EU=new Set(["UK"]);
+const SHORT={"Travel, transportation & hospitality":"Travel & transport"};
+function shortLabel(v){return SHORT[v]||v;}
+function cnt(arr,key,v){return arr.filter(x=>x[key]===v).length;}
+function genColor(i){return `hsl(${Math.round((i*137.508)%360)},48%,52%)`;}
+const DCOLOR={};DATA.forEach((d,i)=>DCOLOR[d.n]=genColor(i));
+const TCOLOR={};TARGETS.forEach((t,i)=>TCOLOR[t.n]=genColor(i*2+4));
+
+/* ===== shared bubble engine ===== */
+let tipEl=null,mapReady=false;
+const bubbleEls={},tBubbleEls={};
+function makeBubbles(field,items,store,colors){
+  items.forEach(d=>{const b=document.createElement("div");b.className="bub";b.dataset.name=d.n;
+    b.style.background=colors[d.n];b.style.left="0px";b.style.top="0px";b.style.opacity="0";
+    field.appendChild(b);store[d.n]=b;});
+}
+function clusterLayout(field,items,dimKey,vals){
+  let W=field.clientWidth||1000;
+  const r=9,unit=22,gap=44,labelH=34,MINCELL=162;
+  let x=10,y=labelH+8,rowH=0;const clusters=[],pos={};
+  vals.forEach(v=>{
+    const members=items.filter(d=>d[dimKey]===v);let maxd=0;
+    const offs=members.map((m,i)=>{const a=i*2.399963,dist=unit*0.82*Math.sqrt(i);maxd=Math.max(maxd,dist);
+      return{m,dx:Math.cos(a)*dist,dy:Math.sin(a)*dist};});
+    const R=maxd+r,cellW=Math.max(R*2,MINCELL)+gap;
+    if(x+cellW>W&&x>10){x=10;y+=rowH+labelH+gap;rowH=0;}
+    const ccx=x+cellW/2,ccy=y+R;
+    clusters.push({v,ccx,ccy,R,n:members.length});
+    offs.forEach(o=>pos[o.m.n]={cx:ccx+o.dx,cy:ccy+o.dy});
+    rowH=Math.max(rowH,R*2);x+=cellW;
+  });
+  return{clusters,pos,totalH:y+rowH+24,r};
+}
+function applyLayout(field,store,items,dimKey,vals,selectedVal){
+  if(!mapReady)return;
+  const{clusters,pos,totalH,r}=clusterLayout(field,items,dimKey,vals);
+  field.style.height=totalH+"px";
+  field.querySelectorAll(".clabel").forEach(e=>e.remove());
+  clusters.forEach(cl=>{const lab=document.createElement("div");lab.className="clabel";
+    lab.style.left=cl.ccx+"px";lab.style.top=(cl.ccy-cl.R-30)+"px";
+    lab.innerHTML=`${esc(shortLabel(cl.v))}<span>${cl.n}</span>`;field.appendChild(lab);});
+  items.forEach(d=>{const b=store[d.n],p=pos[d.n];if(!b||!p)return;
+    b.style.left=(p.cx-r)+"px";b.style.top=(p.cy-r)+"px";b.style.opacity="1";
+    b.dataset.group=d[dimKey];b.classList.toggle("dim",selectedVal&&d[dimKey]!==selectedVal);});
+}
+function attachField(field,selectFn){
+  field.addEventListener("click",e=>{const b=e.target.closest(".bub");if(b)selectFn(b.dataset.group);});
+  field.addEventListener("mouseover",e=>{const b=e.target.closest(".bub");if(b)showTip(e,b.dataset.name);});
+  field.addEventListener("mousemove",e=>{if(tipEl.style.opacity==="1")moveTip(e);});
+  field.addEventListener("mouseout",e=>{const b=e.target.closest(".bub");if(b)hideTip();});
+}
+function showTip(e,t){tipEl.textContent=t;tipEl.style.opacity="1";moveTip(e);}
+function moveTip(e){tipEl.style.left=(e.clientX+12)+"px";tipEl.style.top=(e.clientY-10)+"px";}
+function hideTip(){tipEl.style.opacity="0";}
+function legendHtml(items,dimKey,vals,fn){
+  return vals.map(v=>`<div class="lg" data-group="${esc(v)}" aria-pressed="false" onclick="${fn}(this.dataset.group)">${esc(shortLabel(v))} <b style="font-weight:600">${cnt(items,dimKey,v)}</b></div>`).join("");
+}
+
+/* ===== exec summary ===== */
+function pct(a,b){return b===0?0:Math.round(a/b*100);}
+function topOf(rows,key){const m={};rows.forEach(r=>m[r[key]]=(m[r[key]]||0)+1);
+  let best=null,bn=0;for(const k in m){if(m[k]>bn){bn=m[k];best=k;}}return{label:best,n:bn};}
+function summarize(rows,opts){
+  opts=opts||{};const n=rows.length;
+  if(n===0)return"<p>No customers in this group.</p>";
+  const cPct=pct(rows.filter(r=>r.model==="Consumer").length,n);
+  const euN=rows.filter(r=>EU.has(r.region)).length,usN=rows.filter(r=>r.region==="US").length;
+  const big=rows.filter(r=>r.rev==="≥$10B").length,large=rows.filter(r=>r.rev==="$1B–$10B").length;
+  const mid=rows.filter(r=>r.rev==="$100M–$1B").length,undi=rows.filter(r=>r.rev==="Undisclosed").length;
+  const sector=topOf(rows,"sector"),useC=topOf(rows,"useCase");
+  const metrics=`<div class="metrics">
+    <div class="metric"><div class="n">${n}</div><div class="l">Logos</div></div>
+    <div class="metric"><div class="n">${cPct}%</div><div class="l">Consumer-facing</div></div>
+    <div class="metric"><div class="n">${euN}</div><div class="l">UK / Europe</div></div>
+    <div class="metric"><div class="n">${big+large}</div><div class="l">$1B+ revenue</div></div></div>`;
+  let lines=[];
+  lines.push((opts.skipSector?`${cPct}% consumer-facing`:`Led by ${sector.label} (${sector.n} of ${n}), ${cPct}% consumer-facing`)+`. Dominant use case: ${useC.label.toLowerCase()}.`);
+  let skew=(big+large>=mid&&big+large>=undi)?"enterprise-weighted ($1B+)":(mid>=undi?"mid-market ($100M–$1B)":"largely private / undisclosed");
+  lines.push(`Revenue skews ${skew}: ${big} at $10B+, ${large} at $1B–$10B, ${mid} at $100M–$1B, ${undi} undisclosed.`);
+  if(euN>0)lines.push(`Includes ${euN} UK logo${euN>1?"s":""}${usN?` against ${usN} US`:""}. Continental Europe remains unrepresented.`);
+  else if(usN===n)lines.push(`Entirely US in this slice. No European presence — open territory.`);
+  const read=strategicRead(opts.groupDim,opts.groupVal,{euN,cPct});
+  return`${metrics}${lines.map(l=>`<p>${l}</p>`).join("")}<div class="read">${read}</div>`;
+}
+function strategicRead(dim,val,s){
+  const M={
+   "region:UK":"Sierra's only proven European beachhead: NEXT, Deliveroo, Kraken and Marshmallow. Your job is the fifth logo, ideally continental.",
+   "region:US":"The home market and ~85% of the named book. These are the lookalike templates to match in-territory.",
+   "sector:Retail & consumer goods":"Sierra's deepest vertical and safest wedge. Returns, identity and product support repeat across NEXT, Deliveroo and ASOS. Most new-logo targets cluster here, led by Vinted, Inditex (Zara), Zalando and H&M.",
+   "sector:Financial services":"High-volume, regulated, retention-sensitive. Marshmallow and Nubank prove Sierra closes banks and insurers, opening European FS as credible territory (Wise, Aviva, Revolut).",
+   "sector:Healthcare":"Care navigation and member support dominate, but it is almost entirely US and regulation-bound. The weakest first European bet, and no new-logo target sits here.",
+   "sector:Media":"Retention and engagement for subscription and entertainment brands (SiriusXM, Tubi). Under-explored in Europe, but not where your shortlist concentrates.",
+   "sector:Telecommunications":"Near-empty in Sierra's named book (Singtel only), despite huge interaction volumes and clear cost-to-serve ROI. This is whitespace, and VodafoneThree is the new-logo bet that fills it.",
+   "sector:Travel, transportation & hospitality":"Disruption, refunds and multilingual booking at volume (CLEAR, RunBuggy). A strong European angle: Bolt, Trainline and Ryanair all target this vertical.",
+   "sector:Technology":"A broad bucket holding platforms, security and energy-tech (Kraken, ADT, Airtable, CDW). Mostly US and B2B; treat as supporting evidence, not your wedge.",
+   "model:Consumer":"The core of the book. High-frequency, emotional, revenue-touching volume is the single strongest qualifier.",
+   "model:B2B":"The exception, not the rule, and usually high-volume B2B (CDW, Paychex). Low-volume enterprise software is off-pattern.",
+   "rev:≥$10B":"The founder-worthy tier a Bret or Clay first call is built for.",
+   "rev:$1B–$10B":"The sweet spot: big enough for a founder call, nimble enough to move fast. NEXT and Deliveroo sit here.",
+   "rev:Undisclosed":"Mostly venture-backed DTC brands. Proof Sierra closes mid-market, not just enterprise."
+  };
+  const k=dim+":"+val;
+  if(M[k])return M[k];
+  if(s.euN>0)return "This slice already touches Europe; the pattern is portable into your territory.";
+  if(s.cPct>=80)return "Strongly consumer-facing, the volume profile Sierra converts fastest.";
+  return "A consistent Sierra-shaped pattern: pick a European lookalike with a live trigger and a reachable exec.";
+}
+
+/* ===== base table ===== */
+function flagFor(region){return region==="US"?"🇺🇸 ":region==="UK"?"🇬🇧 ":region==="Asia"?"🌏 ":region==="LatAm"?"🌎 ":"";}
+function flagForHQ(hq){const m={"UK":"🇬🇧 ","Ireland":"🇮🇪 ","Germany":"🇩🇪 ","Sweden":"🇸🇪 ","Estonia":"🇪🇪 ","Lithuania":"🇱🇹 ","Spain":"🇪🇸 ","France":"🇫🇷 ","Netherlands":"🇳🇱 ","Finland":"🇫🇮 "};return m[hq]||"";}
+function rowHtml(d){
+  const euCls=(d.region!=="US")?"eu":"";
+  return `<tr><td class="name"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${DCOLOR[d.n]};margin-right:7px;vertical-align:middle"></span>${esc(d.n)}</td>
+    <td>${esc(d.sector)}</td><td><span class="tag ${euCls}">${flagFor(d.region)}${esc(d.region)}</span></td><td>${esc(d.revL)}</td>
+    <td><span class="tag ${d.model==="B2B"?"b2b":""}">${esc(d.model)}</span></td><td>${esc(d.useCase)}</td>
+    <td class="src"><a href="${d.url}" target="_blank" rel="noopener">${esc(d.src)} ↗</a></td></tr>`;
+}
+function tableHtml(rows){
+  return `<table><thead><tr><th>Customer</th><th>Vertical</th><th>Region</th><th>Revenue</th><th>Model</th><th>Use case</th><th>Source</th></tr></thead>
+    <tbody>${rows.map(rowHtml).join("")}</tbody></table>`;
+}
+
+/* ===== base map ===== */
+const MAPDIMS=[{key:"sector",label:"Vertical"},{key:"region",label:"Region"},{key:"rev",label:"Revenue"},{key:"model",label:"Model"},{key:"useCase",label:"Use case"},{key:"src",label:"Source"}];
+let mapDim="sector",mapSel=null;
+function mapGroups(key){
+  let v=[...new Set(DATA.map(d=>d[key]))];
+  if(key==="region")v.sort((a,b)=>REGORDER.indexOf(a)-REGORDER.indexOf(b));
+  else if(key==="model")v.sort((a,b)=>MODELORDER.indexOf(a)-MODELORDER.indexOf(b));
+  else if(key==="rev")v.sort((a,b)=>REVORDER.indexOf(a)-REVORDER.indexOf(b));
+  else if(key==="sector")v.sort((a,b)=>cnt(DATA,key,b)-cnt(DATA,key,a)||VERTS.indexOf(a)-VERTS.indexOf(b));
+  else v.sort((a,b)=>cnt(DATA,key,b)-cnt(DATA,key,a)||a.localeCompare(b));
+  return v;
+}
+function buildMapDims(){document.getElementById("mapdims").innerHTML=MAPDIMS.map(d=>`<button onclick="setMapDim('${d.key}')" aria-pressed="${d.key===mapDim}">${d.label}</button>`).join("");}
+function buildLegend(){document.getElementById("maplegend").innerHTML=legendHtml(DATA,mapDim,mapGroups(mapDim),"selectGroup");}
+function layoutBase(){applyLayout(document.getElementById("bubblefield"),bubbleEls,DATA,mapDim,mapGroups(mapDim),mapSel);}
+function setMapDim(k){mapDim=k;mapSel=null;buildMapDims();buildLegend();layoutBase();renderBase();}
+function selectGroup(v){
+  mapSel=(mapSel===v)?null:v;
+  document.querySelectorAll('#bubblefield .bub').forEach(b=>b.classList.toggle('dim',mapSel&&b.dataset.group!==mapSel));
+  document.querySelectorAll('#maplegend .lg').forEach(l=>l.setAttribute('aria-pressed',l.dataset.group===mapSel));
+  renderBase();
+}
+function clearBase(){mapSel=null;
+  document.querySelectorAll('#bubblefield .bub').forEach(b=>b.classList.remove('dim'));
+  document.querySelectorAll('#maplegend .lg').forEach(l=>l.setAttribute('aria-pressed','false'));
+  renderBase();}
+function renderBase(){
+  const res=document.getElementById("results");
+  if(mapSel){
+    const sub=DATA.filter(d=>d[mapDim]===mapSel);
+    res.innerHTML=`<div class="summary"><p class="eyebrow">Executive summary · ${esc(mapSel)}</p>
+      <h3>${esc(mapSel)} <span style="font-weight:400;color:var(--sky)">· ${sub.length} logo${sub.length>1?"s":""}</span></h3>
+      ${summarize(sub,{groupDim:mapDim,groupVal:mapSel,skipSector:(mapDim==="sector")})}
+      <p style="margin-top:12px"><a class="reset" href="#" onclick="clearBase();return false;">Clear selection</a></p></div>${tableHtml(sub)}`;
+  }else{
+    let html=`<div class="summary"><p class="eyebrow">Executive summary · the full named book</p>
+      <h3>All ${DATA.length} logos · grouped by ${MAPDIMS.find(m=>m.key===mapDim).label.toLowerCase()}</h3>
+      ${summarize(DATA,{groupDim:"none"})}</div>`;
+    html+=mapGroups(mapDim).map(v=>{const sub=DATA.filter(d=>d[mapDim]===v);
+      return `<div class="group"><div class="group-head"><h2>${esc(v)}</h2><span class="gc">${sub.length} logo${sub.length>1?"s":""}</span></div>
+        <div class="gsummary">${summarize(sub,{groupDim:mapDim,groupVal:v,skipSector:(mapDim==="sector")})}</div>${tableHtml(sub)}</div>`;}).join("");
+    res.innerHTML=html;
+  }
+}
+
+/* ===== targets map ===== */
+const TMAPDIMS=[{key:"sector",label:"Vertical"},{key:"region",label:"Region"},{key:"rev",label:"Revenue"},{key:"model",label:"Model"},{key:"recS",label:"Recipient"},{key:"seat",label:"Seat"},{key:"src",label:"Source"}];
+let tMapDim="sector",tSel=null;
+function tGroups(key){
+  let v=[...new Set(TARGETS.map(d=>d[key]))];
+  if(key==="rev")v.sort((a,b)=>REVORDER.indexOf(a)-REVORDER.indexOf(b));
+  else if(key==="region")v.sort((a,b)=>(a==="UK & Ireland"?0:1)-(b==="UK & Ireland"?0:1));
+  else if(key==="sector")v.sort((a,b)=>cnt(TARGETS,key,b)-cnt(TARGETS,key,a)||VERTS.indexOf(a)-VERTS.indexOf(b));
+  else v.sort((a,b)=>cnt(TARGETS,key,b)-cnt(TARGETS,key,a)||a.localeCompare(b));
+  return v;
+}
+function buildTMapDims(){document.getElementById("tmapdims").innerHTML=TMAPDIMS.map(d=>`<button onclick="setTMapDim('${d.key}')" aria-pressed="${d.key===tMapDim}">${d.label}</button>`).join("");}
+function buildTLegend(){document.getElementById("tlegend").innerHTML=legendHtml(TARGETS,tMapDim,tGroups(tMapDim),"selectTGroup");}
+function layoutTargets(){applyLayout(document.getElementById("tbubblefield"),tBubbleEls,TARGETS,tMapDim,tGroups(tMapDim),tSel);}
+function setTMapDim(k){tMapDim=k;tSel=null;buildTMapDims();buildTLegend();layoutTargets();renderTargetsList();}
+function selectTGroup(v){
+  tSel=(tSel===v)?null:v;
+  document.querySelectorAll('#tbubblefield .bub').forEach(b=>b.classList.toggle('dim',tSel&&b.dataset.group!==tSel));
+  document.querySelectorAll('#tlegend .lg').forEach(l=>l.setAttribute('aria-pressed',l.dataset.group===tSel));
+  renderTargetsList();
+}
+function clearT(){tSel=null;
+  document.querySelectorAll('#tbubblefield .bub').forEach(b=>b.classList.remove('dim'));
+  document.querySelectorAll('#tlegend .lg').forEach(l=>l.setAttribute('aria-pressed','false'));
+  renderTargetsList();}
+function baseNote(v){const base=DATA.filter(d=>d.sector===v).length;
+  return base<=1?"Whitespace vertical: a new-logo win here proves a new category, not just a new logo.":`Sierra has ${base} current logos here, giving you reference proof for the call.`;}
+function targetSummary(rows,dim,val){
+  const n=rows.length;if(!n)return"<p>No targets in this group.</p>";
+  const openN=rows.filter(t=>t.open).length,occN=n-openN;
+  const bret=rows.filter(t=>t.recS==="Bret").length,clay=n-bret;
+  const avg=Math.round(rows.reduce((a,t)=>a+t.fit,0)/n);
+  const uk=rows.filter(t=>t.hq==="UK").length,cont=n-uk;
+  const sv=topOf(rows,"sector");
+  const metrics=`<div class="metrics">
+    <div class="metric"><div class="n">${n}</div><div class="l">Targets</div></div>
+    <div class="metric"><div class="n">${openN}</div><div class="l">Open seats</div></div>
+    <div class="metric"><div class="n">${avg}</div><div class="l">Avg ICP fit</div></div>
+    <div class="metric"><div class="n">${cont}</div><div class="l">Continental</div></div></div>`;
+  let lines=[];
+  lines.push(`Led by ${sv.label} (${sv.n} of ${n}). ${bret} suit a Bret founder-to-founder call, ${clay} a Clay platform conversation.`);
+  lines.push(`${openN} sit on an open seat; ${occN} have an incumbent AI to displace.`);
+  if(!val){
+    const cov=VERTS.map(v=>({v,b:DATA.filter(d=>d.sector===v).length,t:TARGETS.filter(x=>x.sector===v).length}));
+    const withT=cov.filter(c=>c.t>0).map(c=>`${shortLabel(c.v)} ${c.b}+${c.t}${c.b<=1?' (whitespace)':''}`).join(", ");
+    const noT=cov.filter(c=>c.t===0).map(c=>shortLabel(c.v)).join(", ");
+    lines.push(`Coverage by vertical (current + new-logo): ${withT}. No new-logo pick in ${noT}.`);
+  }
+  const read=val?targetRead(dim,val):"The shortlist mirrors where Sierra already wins, in a territory where it has almost no logos. Vinted and Zalando are the cleanest founder-call openers.";
+  return `${metrics}${lines.map(l=>`<p>${l}</p>`).join("")}<div class="read">${read}</div>`;
+}
+function targetRead(dim,val){
+  const M={
+   "sector:Retail & consumer goods":"Sierra's deepest, most referenceable vertical. Returns and identity wedges mirror NEXT, Deliveroo and ASOS directly.",
+   "sector:Financial services":"Regulated and retention-sensitive; Marshmallow and Nubank are the proof points to lean on.",
+   "sector:Travel, transportation & hospitality":"Disruption and refunds at volume; CLEAR and RunBuggy give partial cover, the European angle is wide open.",
+   "sector:Telecommunications":"Whitespace: Singtel is Sierra's only telecom logo, so VodafoneThree would prove a new category.",
+   "recS:Bret":"Founder-to-founder openers; Bret's Salesforce and OpenAI network makes these CEO calls land.",
+   "recS:Clay":"Platform and integration-heavy plays where Clay's product credibility carries the room.",
+   "seat:Open seat":"No incumbent agent to displace; the cleanest, fastest first-call narrative.",
+   "seat:Incumbent AI":"A point bot or rival agent is already in place; the pitch is displacement and out-performance."
+  };
+  return M[dim+":"+val]||"A Sierra-shaped group; lead with the live trigger and a reachable exec.";
+}
+function targetRow(t){
+  const pill=t.open?`<span class="flagpill open">open seat</span>`:`<a class="flagpill occ" href="${t.incumbentUrl}" target="_blank" rel="noopener">incumbent AI ↗</a>`;
+  return `<tr><td class="name tname"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${TCOLOR[t.n]};margin-right:7px;vertical-align:middle"></span>#${t.rank} ${esc(t.n)}</td>
+    <td>${esc(t.sector)}</td><td><span class="tag eu">${flagForHQ(t.hq)}${esc(t.hq)}</span></td><td>${esc(t.scale)}</td><td>${esc(t.mirrors)}</td>
+    <td>${esc(t.wedge)}</td><td><a class="whylink" href="${t.whyUrl}" target="_blank" rel="noopener">${esc(t.why)} ↗</a></td>
+    <td>${esc(t.rec)}</td><td>${pill}</td>
+    <td class="fitcell">${t.fit}<div class="bar"><span style="width:${t.fit}%"></span></div></td></tr>`;
+}
+function targetsTable(rows){
+  return `<table><thead><tr><th>Target</th><th>Vertical</th><th>HQ</th><th>Scale</th><th>Mirrors</th><th>Wedge</th><th>Why-now</th><th>Recipient</th><th>Seat</th><th>Fit</th></tr></thead>
+    <tbody>${rows.map(targetRow).join("")}</tbody></table>`;
+}
+function renderTargetsList(){
+  const box=document.getElementById("tresults");
+  if(tSel){
+    const sub=TARGETS.filter(t=>t[tMapDim]===tSel).sort((a,b)=>a.rank-b.rank);
+    const note=tMapDim==="sector"?baseNote(tSel):"";
+    box.innerHTML=`<div class="summary"><p class="eyebrow">Executive summary · ${esc(tSel)}</p>
+      <h3>${esc(tSel)} <span style="font-weight:400;color:var(--sky)">· ${sub.length} target${sub.length>1?"s":""}</span></h3>
+      ${targetSummary(sub,tMapDim,tSel)}
+      <p style="margin-top:12px"><a class="reset" href="#" onclick="clearT();return false;">Clear selection</a></p></div>
+      ${note?`<div class="gsummary">${note}</div>`:""}${targetsTable(sub)}`;
+  }else{
+    let html=`<div class="summary"><p class="eyebrow">Executive summary · all targets</p>
+      <h3>All ${TARGETS.length} targets · grouped by ${TMAPDIMS.find(m=>m.key===tMapDim).label.toLowerCase()}</h3>
+      ${targetSummary([...TARGETS],tMapDim,null)}</div>`;
+    html+=tGroups(tMapDim).map(v=>{
+      const sub=TARGETS.filter(t=>t[tMapDim]===v).sort((a,b)=>a.rank-b.rank);
+      const note=tMapDim==="sector"?baseNote(v):"";
+      return `<div class="group"><div class="group-head"><h2>${esc(v)}</h2><span class="gc">${sub.length} target${sub.length>1?"s":""}</span></div>
+        <div class="gsummary">${targetSummary(sub,tMapDim,v)}${note?`<br>${note}`:""}</div>${targetsTable(sub)}</div>`;
+    }).join("");
+    box.innerHTML=html;
+  }
+}
+
+/* ===== ICP ===== */
+const ICP=[
+ {dim:"Consumer-facing volume",crit:"High-frequency consumer interactions across the business",ev:"~85% of the 56 are consumer; the true common denominator",w:3},
+ {dim:"Vertical fit",crit:"One of Sierra's 7: retail, FS, telecom, media, travel/transport, healthcare, technology",ev:"Deepest in retail & consumer goods and financial services; telecom near-empty (whitespace)",w:3},
+ {dim:"Revenue scale",crit:"$1B+ for a founder-worthy first call ($100M+ to qualify)",ev:"Half >$1B, 1 in 4 >$10B, plus a mid-market DTC tail",w:2},
+ {dim:"Multi-channel",crit:"Chat, voice and messaging (WhatsApp) in play",ev:"NEXT 3 channels; Singtel, Deliveroo multi-channel",w:3},
+ {dim:"Multi-lingual / multi-market",crit:"Operates across languages and markets",ev:"NEXT 83 countries; non-negotiable across UK+Benelux+Nordics+DACH",w:3},
+ {dim:"Brand-voice sensitivity",crit:"Brand voice is a stated priority",ev:"Explicit buying reason for NEXT, Sonos, Deliveroo, OluKai",w:2},
+ {dim:"Wedge use case",crit:"Revenue/retention-touching: returns, claims, payments, retention",ev:"Returns+identity, claims, retention — never pure deflection",w:3},
+ {dim:"Geography (your edge)",crit:"UK or continental Europe",ev:"4 UK logos; continental Europe still zero — wide open",w:3},
+ {dim:"Why-now trigger",crit:"Live event: new CX leader, cost pressure, expansion, AI move",ev:"Strongest selection filter; not visible in the base itself",w:3},
+ {dim:"Reachable exec",crit:"Named, founder-worthy decision-maker Bret/Clay could open",ev:"The brief is for a founder — the exec must warrant the call",w:3},
+ {dim:"Open seat (no incumbent AI)",crit:"No competing AI agent already deployed; a clean or greenfield seat",ev:"7 of 20 targets sit on an open seat; 13 have an incumbent AI to displace",w:2}
+];
+function buildICP(){
+  document.getElementById("icp-table").innerHTML=`<thead><tr><th>Dimension</th><th>Ideal criteria</th><th>Evidence from the 56</th><th>Weight</th></tr></thead>
+    <tbody>${[...ICP].sort((a,b)=>b.w-a.w).map(r=>`<tr><td class="name">${esc(r.dim)}</td><td>${esc(r.crit)}</td><td>${esc(r.ev)}</td><td class="${r.w===3?'w-high':'w-med'}">${r.w===3?'High':'Medium'}</td></tr>`).join("")}</tbody>`;
+}
+let scoreState=ICP.map(()=>0);
+function buildScorer(){
+  document.getElementById("crits").innerHTML=ICP.map((r,i)=>`<div class="crit">
+    <div><div class="ct">${esc(r.crit)}</div><div class="cw">${r.w===3?'High weight':'Medium weight'}</div></div>
+    <div class="seg"><button onclick="setScore(${i},0,this)" aria-pressed="true">No</button>
+      <button onclick="setScore(${i},0.5,this)" aria-pressed="false">Partial</button>
+      <button onclick="setScore(${i},1,this)" aria-pressed="false">Yes</button></div></div>`).join("");
+  scoreNow();
+}
+function setScore(i,v,el){scoreState[i]=v;el.parentNode.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed","false"));el.setAttribute("aria-pressed","true");scoreNow();}
+function scoreNow(){
+  const dq=[...document.querySelectorAll(".dqbox")].some(b=>b.checked);
+  const maxW=ICP.reduce((a,r)=>a+r.w,0),got=ICP.reduce((a,r,i)=>a+r.w*scoreState[i],0),pc=Math.round(got/maxW*100);
+  let label,vtext;
+  if(dq){label="Disqualified — pass";vtext="A hard disqualifier is ticked. However good the fit looks, this is not the one to put in front of a founder.";}
+  else if(pc>=80){label="Strong target";vtext="Founder-worthy. Matches Sierra's winning profile in-territory. Build the first-call brief around it.";}
+  else if(pc>=60){label="Worth pursuing";vtext="A credible target. Shore up the weak traits (often trigger or reachability) before committing.";}
+  else if(pc>=40){label="Marginal";vtext="Defensible only with a strong narrative. Likely a better second-choice than headline pick.";}
+  else{label="Pass";vtext="Off-pattern for Sierra. Not a defensible answer to 'why this business'.";}
+  document.getElementById("verdict").innerHTML=`<div class="score">${dq?'—':pc+'%'}</div><div class="label">${label}</div><div class="vtext">${vtext}</div>`;
+  updateMatches();
+}
+const SUBBIL=new Set(["Trainline"]);
+const SINGLEMARKET=new Set(["VodafoneThree","Aviva / Direct Line","Currys"]);
+const ICPFILTERS={2:t=>!SUBBIL.has(t.n),4:t=>!SINGLEMARKET.has(t.n),10:t=>t.open};
+function updateMatches(){
+  let rows=TARGETS.slice();const applied=[];
+  Object.keys(ICPFILTERS).forEach(i=>{if(scoreState[i]===1){rows=rows.filter(ICPFILTERS[i]);applied.push(ICP[i].dim.toLowerCase());}});
+  rows.sort((a,b)=>a.rank-b.rank);
+  const chips=rows.map(t=>`<span class="mchip"><span class="mdot" style="background:${TCOLOR[t.n]}"></span>#${t.rank} ${esc(t.n)}</span>`).join("");
+  document.getElementById("icpMatches").innerHTML=
+   `<div class="dim-label" style="margin-bottom:8px">Matching new-logo targets · ${rows.length} of ${TARGETS.length}${applied.length?` · required: ${esc(applied.join(", "))}`:""}</div>
+    <div class="mchips">${chips||'<span class="hint">No target meets every required trait.</span>'}</div>
+    <p class="hint">Set a trait to <b>Yes</b> to require it; the list drops targets that miss it. The shortlist is pre-screened, so consumer model, UK/Europe geography, wedge and reachable exec already hold for all twenty; the live discriminators are <b>revenue scale</b> ($1B+, drops Trainline), <b>multi-lingual / multi-market reach</b> (drops UK-only VodafoneThree, Aviva, Currys) and <b>open seat</b> (drops the 13 with an incumbent AI).</p>`;
+}
+
+/* ===== util / init ===== */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function showView(v){
+  ["base","targets","icp"].forEach(x=>{
+    document.getElementById("view-"+x).classList.toggle("active",v===x);
+    document.getElementById("tab-"+x).setAttribute("aria-selected",v===x);
+  });
+  if(v==="base")requestAnimationFrame(layoutBase);
+  if(v==="targets")requestAnimationFrame(layoutTargets);
+}
+document.getElementById("footBase").innerHTML=
+ "56 publicly named Sierra logos, all aligned to Sierra's seven official verticals (<a href='https://sierra.ai/industries' target='_blank' rel='noopener'>sierra.ai/industries</a>). Each bubble is one company; pick a lens to regroup, click to drill in. Sierra reports serving 'hundreds' of customers, so this is the public floor. Judgment calls: energy (Kraken/Octopus), home security (ADT), real estate (Redfin), payroll (Paychex) and community platforms (Discord, GoFundMe, Guild) sit in Technology; automotive (Rivian) and auto-glass (Safelite) sit in Retail & consumer goods. Source links go to each customer's Sierra case study, the <a href='https://sierra.ai/blog/theres-an-agent-for-that-and-it-runs-on-sierra' target='_blank' rel='noopener'>Sierra blog</a> (Deliveroo, Vans, Bissell, Discord), <a href='https://research.contrary.com/company/sierra' target='_blank' rel='noopener'>Contrary Research</a> (press-named: Nordstrom, Nubank, Cigna, Rivian) or the <a href='https://sierra.ai/customers' target='_blank' rel='noopener'>customers page</a> (Wayfair). Revenue shown in USD, converted from source GBP/EUR/SGD where needed; figures are public-record approximations, not Sierra-verified.";
+document.getElementById("footTargets").innerHTML=
+ "A 20-strong new-logo target list, excluding every current Sierra logo, scored against the ICP and aligned to Sierra's seven verticals. Each bubble is one company; cluster by vertical, recipient (Bret vs Clay) or seat status and click to drill in. Why-now events are dated to the last nine months; why-now and incumbent-AI links go to company results and press. Revenue shown in USD, converted from source GBP/EUR/SGD where needed; revenue figures and ICP fit scores are directional approximations, not Sierra-verified.";
+document.getElementById("footIcp").innerHTML=
+ "The ICP is derived from all 56 <a href='https://sierra.ai/customers' target='_blank' rel='noopener'>named Sierra logos</a>. The common denominator is consumer-facing interaction volume, not size: flagship logos are $1B+ (half the book exceeds $1B, one in four exceeds $10B), but a large tail are mid-market venture-backed DTC brands. By vertical the book is deepest in retail & consumer goods and financial services; telecommunications is near-empty despite ideal volumes, which is exactly where a new-logo bet has room. The scorecard above weights ten ICP traits; any disqualifier forces a pass. Fit scores are directional, not Sierra-verified.";
+tipEl=document.createElement("div");tipEl.className="tip";document.body.appendChild(tipEl);
+makeBubbles(document.getElementById("bubblefield"),DATA,bubbleEls,DCOLOR);
+makeBubbles(document.getElementById("tbubblefield"),TARGETS,tBubbleEls,TCOLOR);
+attachField(document.getElementById("bubblefield"),selectGroup);
+attachField(document.getElementById("tbubblefield"),selectTGroup);
+mapReady=true;
+buildMapDims();buildLegend();buildTMapDims();buildTLegend();buildICP();buildScorer();
+layoutBase();renderBase();renderTargetsList();
+let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{
+  if(document.getElementById("view-base").classList.contains("active"))layoutBase();
+  if(document.getElementById("view-targets").classList.contains("active"))layoutTargets();},150);});
+</script>
+</body>
+</html>
